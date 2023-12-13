@@ -1,4 +1,4 @@
-geopandas~=0.14.1
+geopandas
 plotly~=5.18.0
 pandas~=2.1.3
 dash~=2.14.2
