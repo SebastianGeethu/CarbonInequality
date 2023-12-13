@@ -16,7 +16,7 @@ df = pd.read_csv('CombinedDoc_new.csv')
 
 # Create a Dash web application
 app = Dash(__name__, external_stylesheets=[dbc.themes.BOOTSTRAP])
-server = app.server()
+server = app.server
 
 def read_lad_geojson(country):
     country_jsonfile = country + "_LAD_Boundaries.json"
