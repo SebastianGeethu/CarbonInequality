@@ -16,7 +16,7 @@ df = pd.read_csv('CombinedDoc_new.csv')
 
 # Create a Dash web application
 app = Dash(__name__, external_stylesheets=[dbc.themes.BOOTSTRAP])
-
+server = app.server
 
 # def read_lad_geojson(country):
 #     country_jsonfile = country + "_LAD_Boundaries.json"
@@ -50,11 +50,8 @@ app = Dash(__name__, external_stylesheets=[dbc.themes.BOOTSTRAP])
 
 def read_lad_geojson(country):
     country_jsonfile = country + "_LAD_Boundaries.json"
-    if not os.path.exists(country_jsonfile):
-        print("File does not exist")
-    else:
-        with open(country_jsonfile) as f:
-            census_lads = json.load(f)
+    with open(country_jsonfile) as f:
+        census_lads = json.load(f)
     return census_lads
 
 def get_max_value(year, country):
