@@ -10,6 +10,8 @@ from functools import reduce
 import pandas as pd
 from turfpy.measurement import bbox
 import plotly.graph_objects as go
+import io
+
 
 # Load your cleaned and combined dataset
 df = pd.read_csv('CombinedDoc_new.csv')
@@ -48,11 +50,46 @@ server = app.server
 #     return census_lads
 
 
+# def read_lad_geojson(country):
+#     country_jsonfile = country + "_LAD_Boundaries.json"
+#     with open(country_jsonfile) as f:
+#         census_lads = json.load(f)
+#     return census_lads
+
+
+
 def read_lad_geojson(country):
     country_jsonfile = country + "_LAD_Boundaries.json"
-    with open(country_jsonfile) as f:
-        census_lads = json.load(f)
+
+    if os.path.exists(country_jsonfile):
+        with open(country_jsonfile) as f:
+            census_lads = json.load(f)
+    else:
+        ladgdf = gpd.read_file("lad_small.shp")
+
+        # Simplify geometry
+        ladgdf.geometry = ladgdf.geometry.simplify(0.001, preserve_topology=True)
+
+        # Select necessary columns
+        ladgdf = ladgdf[['LAD22CD', 'geometry']]
+
+        ladgdf.to_crs(epsg=4326, inplace=True)
+
+        # Serialize GeoDataFrame to GeoJSON format in-memory
+        lad_json_data = ladgdf.to_json()
+
+        # Deserialize GeoJSON data back to Python objects
+        census_lads = json.loads(lad_json_data)
+
+        # Filter 'features' based on 'LAD22CD'
+        census_lads['features'] = [f for f in census_lads['features'] if f['properties']['LAD22CD'].startswith(country[0])]
+
+        # Save the resulting GeoJSON directly to country_jsonfile
+        with open(country_jsonfile, 'w') as f:
+            json.dump(census_lads, f)
+
     return census_lads
+
 
 def get_max_value(year, country):
     return df[(df['Year'] == year) & (df['Country'] == country)]["Income_Per_Capita"].max()
